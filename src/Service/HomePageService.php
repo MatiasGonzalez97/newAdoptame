@@ -19,7 +19,7 @@ class HomePageService
         $this->usuarioRepo = $usuarioRepository;
     }
 
-    public function login($request)
+    public function createAccount($request)
     {
         try {
             $this->comprobeUsernameExists($request['username']);
@@ -31,6 +31,14 @@ class HomePageService
         }
     }
 
+    public function login($request)
+    {
+        try{
+            return $this->usuarioRepo->login($request);
+        }catch (\Exception $exception) {
+            return ['error'=>$exception->getMessage(),'code'=>$exception->getCode()];
+        }
+    }
     public function comprobeUsernameExists($username)
     {
         if (!empty($this->usuarioRepo->findOneBy((['username' =>$username])))) {

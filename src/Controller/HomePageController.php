@@ -14,7 +14,15 @@ class HomePageController extends AbstractController
      */
     public function index(Request $request,HomePageService $homePageService)
     {
-        return $this->json($homePageService->login($request->request->all()));
+        return $this->json($homePageService->createAccount($request->request->all()));
+    }
+
+    /**
+     * @Route("/login",name="login")
+     */
+    public function login(Request $request,HomePageService $homePageServie)
+    {
+        return $this->json($homePageServie->login($request->request->all()));
     }
 
     public function google(){

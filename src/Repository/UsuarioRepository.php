@@ -37,6 +37,30 @@ class UsuarioRepository extends ServiceEntityRepository
         }
     }
 
+    public function login($loginData)
+    {
+        try{
+            if(!isset($loginData['password']) && (!isset($loginData['dni']) || !isset($loginData['email']))) {
+                throw new \Exception('No se ha podido loguear fijese en los datos enviados',500);
+            }
+            if(isset($loginData['dni'])) {
+                $success = $this->findOneBy(['dni' => $loginData['dni'],'password'=>$loginData['password']]);
+            }elseif (isset($loginData['email'])) {
+                $success = $this->findOneBy(['email' => $loginData['email'], 'password' => $loginData['password']]);
+            }
+            if(($success)) {
+                $success->setLogin($success->getLogin()+1);
+                $this->_em->persist($success);
+                $this->_em->flush();
+                return ['success' => 'se ha logeado correctamente'];
+            }else {
+                throw new \Exception('No se ha podido loguear chequee los datos ingresados y la contraseña');
+            }
+        }catch (\Exception $exception) {
+            return ['error'=>$exception->getMessage(),'code' => $exception->getCode()];
+        }
+    }
+
     private function save($toSave)
     {
         $this->_em->persist($toSave);

@@ -47,6 +47,11 @@ class Usuario
      */
     private $password;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $login;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -120,6 +125,18 @@ class Usuario
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    public function getLogin(): ?int
+    {
+        return $this->login;
+    }
+
+    public function setLogin(int $login): self
+    {
+        $this->login = $login;
 
         return $this;
     }
