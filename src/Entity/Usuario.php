@@ -52,6 +52,21 @@ class Usuario
      */
     private $login;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $identificador_login;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $created_at;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $updated_at;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -137,6 +152,42 @@ class Usuario
     public function setLogin(int $login): self
     {
         $this->login = $login;
+
+        return $this;
+    }
+
+    public function getIdentificadorLogin(): ?string
+    {
+        return $this->identificador_login;
+    }
+
+    public function setIdentificadorLogin(string $identificador_login): self
+    {
+        $this->identificador_login = $identificador_login;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $created_at): self
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updated_at): self
+    {
+        $this->updated_at = $updated_at;
 
         return $this;
     }

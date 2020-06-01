@@ -45,8 +45,10 @@ class UsuarioRepository extends ServiceEntityRepository
             }
             if(isset($loginData['dni'])) {
                 $success = $this->findOneBy(['dni' => $loginData['dni'],'password'=>$loginData['password']]);
+                $success->setIdentificadorLogin('dni');
             }elseif (isset($loginData['email'])) {
                 $success = $this->findOneBy(['email' => $loginData['email'], 'password' => $loginData['password']]);
+                $success->setIdentificadorLogin('email');
             }
             if(($success)) {
                 $success->setLogin($success->getLogin()+1);
