@@ -2,6 +2,8 @@
 
 namespace App\Repository;
 
+use App\Entity\FormaLogin;
+use App\Entity\LoginWay;
 use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -28,7 +30,11 @@ class UsuarioRepository extends ServiceEntityRepository
                 ->setEmail($infoUser['email'])
                 ->setApellido($infoUser['apellido'])
                 ->setUsername($infoUser['username'])
-                ->setPassword($infoUser['password']);
+                ->setPassword($infoUser['password'])
+                ->setLogin(0)
+                ->setIdentificadorLogin('null')
+                ->setCreatedAt(new \DateTime())
+                ->setUpdatedAt(new \DateTime());
             $this->save($user);
             return $user->getId();
         }catch (\Exception $exception){
@@ -43,15 +49,22 @@ class UsuarioRepository extends ServiceEntityRepository
             if(!isset($loginData['password']) && (!isset($loginData['dni']) || !isset($loginData['email']))) {
                 throw new \Exception('No se ha podido loguear fijese en los datos enviados',500);
             }
+            $login = new FormaLogin();
             if(isset($loginData['dni'])) {
                 $success = $this->findOneBy(['dni' => $loginData['dni'],'password'=>$loginData['password']]);
-                $success->setIdentificadorLogin('dni');
+                $loginWay = $this->_em->getReference(LoginWay::class,1);
+                $login->setLoginWay($loginWay);
+                $login->setUsuario($success);
+//                dd($login);
             }elseif (isset($loginData['email'])) {
                 $success = $this->findOneBy(['email' => $loginData['email'], 'password' => $loginData['password']]);
-                $success->setIdentificadorLogin('email');
+                $loginWay = $this->_em->getReference(LoginWay::class,2);
+                $login->setLoginWay($loginWay);
+                $login->setUsuario($success);
             }
             if(($success)) {
                 $success->setLogin($success->getLogin()+1);
+                $this->_em->persist($login);
                 $this->_em->persist($success);
                 $this->_em->flush();
                 return ['success' => 'se ha logeado correctamente'];
@@ -65,9 +78,13 @@ class UsuarioRepository extends ServiceEntityRepository
 
     private function save($toSave)
     {
-        $this->_em->persist($toSave);
-        $this->_em->flush();
-        $this->_em->commit();
+        try {
+            $this->_em->persist($toSave);
+            $this->_em->flush();
+            $this->_em->commit();
+        }catch(\Exception $exception) {
+            dd($exception);
+        }
     }    // /**
     //  * @return Usuario[] Returns an array of Usuario objects
     //  */
