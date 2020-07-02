@@ -7,6 +7,7 @@ use App\Entity\LoginWay;
 use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * @method Usuario|null find($id, $lockMode = null, $lockVersion = null)
@@ -16,9 +17,12 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class UsuarioRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private $password_encoder;
+
+    public function __construct(ManagerRegistry $registry,UserPasswordEncoderInterface $passwordEncoder)
     {
         parent::__construct($registry, Usuario::class);
+        $this->password_encoder = $passwordEncoder;
     }
 
     public function create($infoUser){
@@ -30,14 +34,16 @@ class UsuarioRepository extends ServiceEntityRepository
                 ->setEmail($infoUser['email'])
                 ->setApellido($infoUser['apellido'])
                 ->setUsername($infoUser['username'])
-                ->setPassword($infoUser['password'])
+                ->setPassword($this->password_encoder->encodePassword($user,$infoUser['password']))
                 ->setLogin(0)
                 ->setIdentificadorLogin('null')
                 ->setCreatedAt(new \DateTime())
-                ->setUpdatedAt(new \DateTime());
+                ->setUpdatedAt(new \DateTime())
+                ->setRoles('["ROLE_USER"]');
             $this->save($user);
             return $user->getId();
-        }catch (\Exception $exception){
+        }catch (\Exception $exception) {
+            dd($exception);
             $this->_em->rollback();
             return $exception;
         }

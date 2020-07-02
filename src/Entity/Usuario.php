@@ -68,6 +68,11 @@ class Usuario implements UserInterface
      */
     private $updated_at;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $roles;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -198,7 +203,7 @@ class Usuario implements UserInterface
      */
     public function getRoles()
     {
-        // TODO: Implement getRoles() method.
+        return array($this->roles);
     }
 
     /**
@@ -215,5 +220,12 @@ class Usuario implements UserInterface
     public function eraseCredentials()
     {
         // TODO: Implement eraseCredentials() method.
+    }
+
+    public function setRoles(string $roles): self
+    {
+        $this->roles = $roles;
+
+        return $this;
     }
 }
