@@ -29,6 +29,8 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
     private $urlGenerator;
     private $csrfTokenManager;
     private $encode;
+    private $loginData;
+    private $loginAttribute;
 
     public function __construct(EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager,UserPasswordEncoderInterface $passwordEncoder)
     {
@@ -46,14 +48,28 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
 
     public function getCredentials(Request $request)
     {
+        if(!empty($request->request->get('username'))) {
+            $this->loginData = $request->request->get('username');
+            $this->loginAttribute = 'username';
+        } elseif (!empty($request->request->get('email'))) {
+            $this->loginData = $request->request->get('email');
+            $this->loginAttribute = 'email';
+        } else if (!empty($request->request->get('dni'))) {
+            $this->loginData = $request->request->get('dni');
+            $this->loginAttribute = 'dni';
+        } else {
+            return 'falta informacion';
+        }
+
         $credentials = [
-            'username' => $request->request->get('username'),
+            $this->loginAttribute => $this->loginData,
             'password' => $request->request->get('password'),
             'csrf_token' => $request->request->get('_csrf_token'),
         ];
+
         $request->getSession()->set(
             Security::LAST_USERNAME,
-            $credentials['username']
+            $this->loginAttribute
         );
 
         return $credentials;
@@ -65,12 +81,12 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         if (!$this->csrfTokenManager->isTokenValid($token)) {
             throw new InvalidCsrfTokenException();
         }
-
-        $user = $this->entityManager->getRepository(Usuario::class)->findOneBy(['username' => $credentials['username']]);
-
+//        dump($credentials,$credentials[$this->loginAttribute]);
+        $user = $this->entityManager->getRepository(Usuario::class)->findOneBy([$this->loginAttribute => $credentials[$this->loginAttribute]]);
+//        dd($user);
         if (!$user) {
             // fail authentication with a custom error
-            throw new CustomUserMessageAuthenticationException('Username could not be found.');
+            throw new CustomUserMessageAuthenticationException('User could not be found.');
         }
 
         return $user;
